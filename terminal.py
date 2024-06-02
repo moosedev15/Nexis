@@ -5,26 +5,27 @@ from datetime import datetime
 class Terminal:
     def __init__(self):
         self.commands = {
-            "help": self.help,
-            "ls": self.list_files,
-            "cd": self.change_directory,
-            "mkdir": self.make_directory,
-            "rmdir": self.remove_directory,
-            "touch": self.create_file,
-            "rm": self.remove_file,
-            "pwd": self.print_working_directory,
-            "echo": self.echo,
-            "cat": self.read_file,
-            "cp": self.copy_file,
-            "mv": self.move_file,
-            "date": self.current_date,
-            "time": self.current_time,
-            "whoami": self.whoami,
-            "exit": self.exit_terminal,
-            "clear": self.clear_terminal,
-            "rename": self.rename_file,
-            "find": self.find_file,
-            "size": self.file_size
+            "help": {"func": self.help, "description": "Displays this help message.", "usage": "help"},
+            "ls": {"func": self.list_files, "description": "Lists files in the current directory.", "usage": "ls"},
+            "cd": {"func": self.change_directory, "description": "Changes the current directory.", "usage": "cd <path>"},
+            "mkdir": {"func": self.make_directory, "description": "Creates a new directory.", "usage": "mkdir <dirname>"},
+            "rmdir": {"func": self.remove_directory, "description": "Removes a directory.", "usage": "rmdir <dirname>"},
+            "touch": {"func": self.create_file, "description": "Creates an empty file.", "usage": "touch <filename>"},
+            "rm": {"func": self.remove_file, "description": "Removes a file.", "usage": "rm <filename>"},
+            "pwd": {"func": self.print_working_directory, "description": "Prints the current working directory.", "usage": "pwd"},
+            "echo": {"func": self.echo, "description": "Prints the provided text.", "usage": "echo <text>"},
+            "cat": {"func": self.read_file, "description": "Displays the contents of a file.", "usage": "cat <filename>"},
+            "cp": {"func": self.copy_file, "description": "Copies a file.", "usage": "cp <src> <dst>"},
+            "mv": {"func": self.move_file, "description": "Moves or renames a file.", "usage": "mv <src> <dst>"},
+            "date": {"func": self.current_date, "description": "Displays the current date.", "usage": "date"},
+            "time": {"func": self.current_time, "description": "Displays the current time.", "usage": "time"},
+            "whoami": {"func": self.whoami, "description": "Displays the current user.", "usage": "whoami"},
+            "exit": {"func": self.exit_terminal, "description": "Exits the terminal.", "usage": "exit"},
+            "clear": {"func": self.clear_terminal, "description": "Clears the terminal screen.", "usage": "clear"},
+            "rename": {"func": self.rename_file, "description": "Renames a file.", "usage": "rename <src> <dst>"},
+            "find": {"func": self.find_file, "description": "Finds a file in the current directory and subdirectories.", "usage": "find <filename>"},
+            "size": {"func": self.file_size, "description": "Displays the size of a file.", "usage": "size <filename>"},
+            "edit": {"func": self.edit_file, "description": "Edits the content of a file.", "usage": "edit <filename>"}
         }
         self.running = True
 
@@ -39,16 +40,16 @@ class Terminal:
     def execute_command(self, cmd_name, args):
         if cmd_name in self.commands:
             try:
-                self.commands[cmd_name](*args)
+                self.commands[cmd_name]["func"](*args)
             except TypeError:
-                print(f"Invalid usage of command: {cmd_name}. Try 'help' for more information.")
+                print(f"Invalid usage of command: {cmd_name}. Usage: {self.commands[cmd_name]['usage']}")
         else:
             print(f"Command not found: {cmd_name}. Try 'help' for more information.")
 
     def help(self):
         print("Available commands:")
-        for cmd in self.commands:
-            print(f" - {cmd}")
+        for cmd, details in self.commands.items():
+            print(f" - {cmd}: {details['description']}\n   Usage: {details['usage']}")
 
     def list_files(self):
         for item in os.listdir():
@@ -142,6 +143,28 @@ class Terminal:
         except FileNotFoundError:
             print(f"No such file: {filename}")
 
+    def edit_file(self, filename):
+        try:
+            with open(filename, 'r') as file:
+                print(f"Current content of {filename}:")
+                print(file.read())
+            
+            print("\nEnter new content for the file. Type 'SAVE' on a new line to save and exit.")
+            lines = []
+            while True:
+                line = input()
+                if line == 'SAVE':
+                    break
+                lines.append(line)
+            
+            with open(filename, 'w') as file:
+                file.write("\n".join(lines))
+            print(f"{filename} has been updated.")
+
+        except FileNotFoundError:
+            print(f"No such file: {filename}")
+
 if __name__ == "__main__":
     terminal = Terminal()
     terminal.run()
+
